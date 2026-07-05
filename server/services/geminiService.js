@@ -109,7 +109,7 @@ export const generateBudgetOptimizer = async (payload) => {
 
 export const chatAssistant = async (question) => {
   const prompt = templates.chatAssistant({ question });
-  return await callGemini(prompt, 400);
+  return await callGemini(prompt, 1500);
 };
 
 export const getPromptForType = (type, payload) => {
