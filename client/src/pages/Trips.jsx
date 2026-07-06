@@ -83,7 +83,7 @@ export default function Trips(){
                 <td>{trip.title}</td>
                 <td>{trip.destination}</td>
                 <td>{trip.start_date} → {trip.end_date}</td>
-                <td>${trip.budget}</td>
+                <td>{trip.budget}</td>
                 <td><button className="btn secondary" type="button" onClick={()=>startEdit(trip)}>Edit</button><button className="btn secondary" type="button" onClick={()=>handleDelete(trip.id)}>Delete</button></td>
               </tr>
             ))}

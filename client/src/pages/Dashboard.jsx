@@ -45,7 +45,7 @@ export default function Dashboard(){
           </div>
           <div className="card">
             <h3>Recent Expenses</h3>
-            <ul>{stats.expenses.map((expense)=> <li key={expense.id}>{expense.category}: ${expense.amount}</li>)}</ul>
+            <ul>{stats.expenses.map((expense)=> <li key={expense.id}>{expense.category}: {expense.amount}</li>)}</ul>
           </div>
         </>
       )}

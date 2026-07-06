@@ -4,7 +4,7 @@ import { getExpenses, createExpense, updateExpense, deleteExpense, getSummary, g
 import { getTrips } from '../services/tripService';
 import { useToast } from '../context/ToastContext';
 
-const initial = { tripId:'', category:'', amount:'', currency:'USD', description:'', spentAt:'' };
+const initial = { tripId:'', category:'', amount:'', currency:'', description:'', spentAt:'' };
 
 export default function Expenses(){
   const [expenses, setExpenses] = useState([]);
@@ -67,7 +67,7 @@ export default function Expenses(){
     if(!form.tripId) return;
     try {
       const res = await getBudgetRemaining(form.tripId);
-      showSuccess(`Budget remaining: $${res.data.remaining}`);
+      showSuccess(`Budget remaining: ${res.data.remaining}`);
     } catch { showError('Could not calculate budget'); }
   };
 
@@ -99,13 +99,13 @@ export default function Expenses(){
         <>
           <div className="card">
             <h3>Summary</h3>
-            <p>Total spent: ${summary?.total ?? 0}</p>
+            <p>Total spent: {summary?.total ?? 0}</p>
             <p>Categories: {summary?.categories?.length ?? 0}</p>
           </div>
           <table className="table">
             <thead><tr><th>Date</th><th>Category</th><th>Amount</th><th>Trip</th><th>Actions</th></tr></thead>
             <tbody>
-              {expenses.map(item=><tr key={item.id}><td>{item.spent_at.slice(0,10)}</td><td>{item.category}</td><td>${item.amount}</td><td>{item.trip_id || '-'}</td><td><button className="btn secondary" onClick={()=>startEdit(item)}>Edit</button><button className="btn secondary" onClick={()=>handleDelete(item.id)}>Delete</button></td></tr>)}
+              {expenses.map(item=><tr key={item.id}><td>{item.spent_at.slice(0,10)}</td><td>{item.category}</td><td>{item.amount}</td><td>{item.trip_id || '-'}</td><td><button className="btn secondary" onClick={()=>startEdit(item)}>Edit</button><button className="btn secondary" onClick={()=>handleDelete(item.id)}>Delete</button></td></tr>)}
             </tbody>
           </table>
         </>

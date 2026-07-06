@@ -5,7 +5,7 @@ dotenv.config();
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-const callGemini = async (prompt, maxTokens = 1500) => {
+const callGemini = async (prompt, maxTokens = 4000) => {
   if (!GEMINI_API_KEY) throw new Error('GEMINI_API_KEY not configured');
 
   // Updated to use the faster and smarter gemini-2.5-flash model
@@ -24,8 +24,11 @@ const callGemini = async (prompt, maxTokens = 1500) => {
           }
         ],
         generationConfig: {
-          maxOutputTokens: maxTokens,
-        }
+    temperature: 0.4,
+    topP: 0.9,
+    topK: 40,
+    maxOutputTokens: maxTokens
+}
       },
       {
         headers: {
@@ -50,66 +53,254 @@ const callGemini = async (prompt, maxTokens = 1500) => {
 };
 
 const templates = {
-  tripPlanner: ({ destination, budget, days, interests }) => `You are an expert travel planner with deep knowledge of global destinations.
+  tripPlanner: ({ destination, budget, days, interests }) => `
+You are an AI Travel Planner.
 
-Task: Create a professional, day-by-day itinerary for a ${days}-day trip to ${destination}.
-Constraints:
-- Total budget: ${budget}
-- Traveler interests: ${interests}
+IMPORTANT RULES
 
-Deliverables (structured):
-1) Summary: brief trip overview and high-level budget estimate.
-2) Day-wise itinerary: for each day include morning/afternoon/evening activities, approximate cost per activity, and transit suggestions.
-3) Accommodation: 3 recommended hotels with price range and neighborhood notes.
-4) Food: recommended dishes, restaurants, typical meal costs.
-5) Local transport: how to get around (card/ticket options and approximate fares).
-6) Safety tips and cultural notes.
-7) Quick packing suggestions specific to this trip.
+- Never introduce yourself.
+- Never write paragraphs.
+- Never write sentences like "As an expert travel planner..."
+- Reply ONLY using headings and bullet points.
+- Never use currency symbols like $, ₹, €, £.
+- Treat all expenses as plain numbers.
+- Plan the trip strictly within the budget.
+- The total estimated expense must never exceed ${budget}.
+- Complete every section.
+- Give meaningful and practical suggestions.
 
-Return result as clear readable text with headings and bullet lists.`,
+Destination: ${destination}
 
-  packingList: ({ destination, season }) => `You are an expert travel packing assistant.
+Duration: ${days} Days
 
-Task: Create a comprehensive packing checklist for travel to ${destination} during ${season}.
-Include categories: documents, clothing, electronics, toiletries, health, region-specific items, and optional items.
-Mark items as MUST/HIGH/LOW priority and add short rationale for each category.`,
+Budget: ${budget}
 
-  budgetOptimizer: ({ currentExpenses, budget }) => `You are a travel finance advisor.
+Traveler Interests: ${interests}
 
-Task: Given the current expense items: ${JSON.stringify(currentExpenses)}, and a total budget of ${budget}, create a daily spending plan and suggest categories where the user can reduce expenses.
-Deliverables:
-- Summary of current spend vs budget
-- Suggested daily allowance for remaining days
-- Category-wise recommendations (specific actions)
-- Quick tips to stretch the budget
+====================================
+TRIP SUMMARY
+====================================
+• Destination
+• Duration
+• Total Budget
+• Estimated Total Expense
+• Remaining Budget
+====================================
+DAY-WISE ITINERARY
+====================================
 
-Return as concise, actionable points with small tables or bullet lists.`,
+Create the itinerary for ALL ${days} days.
+For EVERY day include:
+Morning
+• Place
+• Activity
+• Approximate Expense
+Afternoon
+• Place
+• Lunch Recommendation
+• Approximate Expense
+Evening
+• Place
+• Activity
+• Dinner Recommendation
+• Approximate Expense
 
-  chatAssistant: ({ question }) => `You are a knowledgeable travel assistant. Answer the user's question concisely and professionally.
+Night
+• Optional Activity
+• Approximate Expense
+Daily Total
+====================================
+HOTEL RECOMMENDATIONS
+====================================
 
-Question: ${question}
+Recommend exactly 3 hotels.
 
-Provide a clear answer, suggestions, and references if relevant.`,
+For each hotel include
+• Hotel Name
+• Area
+• Rating
+• Cost Per Night
+• Best For
+
+====================================
+FOOD RECOMMENDATIONS
+====================================
+
+Recommend
+• Breakfast
+• Lunch
+• Dinner
+• Local Special Foods
+
+Mention approximate expense for every item.
+
+====================================
+LOCAL TRANSPORT
+====================================
+
+Mention
+
+• Metro
+• Bus
+• Taxi
+• Auto
+• Rental Vehicle (if available)
+
+Mention approximate expense.
+
+====================================
+TOP ATTRACTIONS
+====================================
+
+Recommend 10 places.
+
+For every place include
+
+• Name
+• Why Visit
+• Approximate Expense
+
+====================================
+BUDGET BREAKDOWN
+====================================
+
+Accommodation
+
+Food
+Transport
+Activities
+Shopping
+Emergency
+Grand Total
+
+====================================
+SAFETY TIPS
+====================================
+
+Give 10 bullet points.
+
+====================================
+LOCAL CULTURE
+====================================
+Give 10 bullet points.
+====================================
+PACKING SUGGESTIONS
+====================================
+
+Documents
+Clothes
+Electronics
+Medicines
+Accessories
+Optional Items
+====================================
+IMPORTANT
+====================================
+
+Return ONLY bullet points.
+Do NOT use paragraphs.
+Do NOT skip any section.
+Do NOT exceed the budget.
+Do NOT use any currency symbol.
+`,
+
+  packingList: ({ destination, season }) => `
+You are an AI Packing Assistant.
+
+Destination: ${destination}
+
+Season: ${season}
+
+Rules
+
+- Reply ONLY using bullet points.
+- Never write paragraphs.
+- Complete every category.
+
+Generate the following:
+
+DOCUMENTS
+CLOTHES
+FOOTWEAR
+ELECTRONICS
+TOILETRIES
+MEDICINES
+ACCESSORIES
+REGION SPECIFIC ITEMS
+OPTIONAL ITEMS
+For every item include
+• Item
+• Priority (Must / High / Low)
+• Reason
+`,
+
+  budgetOptimizer: ({ currentExpenses, budget }) => `
+You are an AI Budget Optimizer.
+Budget: ${budget}
+Current Expenses:
+${JSON.stringify(currentExpenses)}
+
+Rules
+
+- Never write paragraphs.
+- Never use currency symbols.
+- Reply only in bullet points.
+- Keep every expense as a number only.
+Generate
+CURRENT EXPENSE SUMMARY
+• Total Budget
+• Total Spent
+• Remaining Budget
+CATEGORY ANALYSIS
+• Accommodation
+• Food
+• Transport
+• Activities
+• Shopping
+WAYS TO SAVE MONEY
+DAILY SPENDING LIMIT
+FINAL RECOMMENDATIONS
+`,
+
+  chatAssistant: ({ question }) => `
+You are an AI Travel Assistant.
+
+Question:
+
+${question}
+
+Rules
+- Never write paragraphs.
+- Reply only using bullet points.
+- Give clear and practical answers.
+- Give multiple recommendations whenever possible.
+
+Structure your answer as:
+ANSWER
+KEY POINTS
+RECOMMENDATIONS
+TRAVEL TIPS (if applicable)
+`,
 };
 
 export const generateTripPlanner = async (payload) => {
   const prompt = templates.tripPlanner(payload);
-  return await callGemini(prompt);
+  return await callGemini(prompt, 4000);
 };
 
 export const generatePackingList = async (payload) => {
   const prompt = templates.packingList(payload);
-  return await callGemini(prompt);
+  return await callGemini(prompt, 2500);
 };
 
 export const generateBudgetOptimizer = async (payload) => {
   const prompt = templates.budgetOptimizer(payload);
-  return await callGemini(prompt);
+  return await callGemini(prompt, 2500);
 };
 
 export const chatAssistant = async (question) => {
   const prompt = templates.chatAssistant({ question });
-  return await callGemini(prompt, 1500);
+  return await callGemini(prompt, 2000);
 };
 
 export const getPromptForType = (type, payload) => {
@@ -117,4 +308,10 @@ export const getPromptForType = (type, payload) => {
   return templates[type](payload);
 };
 
-export default { generateTripPlanner, generatePackingList, generateBudgetOptimizer, chatAssistant, getPromptForType };
+export default {
+  generateTripPlanner,
+  generatePackingList,
+  generateBudgetOptimizer,
+  chatAssistant,
+  getPromptForType,
+};
