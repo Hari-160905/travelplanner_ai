@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { FiCloud, FiEye } from 'react-icons/fi';
 import LoadingSpinner from '../components/LoadingSpinner';
+import ProgressBar from '../components/ProgressBar';
 import { getTrips, createTrip, updateTrip, deleteTrip } from '../services/tripService';
 import { useToast } from '../context/ToastContext';
+import { useSearch } from '../context/SearchContext';
 
 const initialForm = { title:'', destination:'', startDate:'', endDate:'', budget:'', notes:'' };
 
@@ -12,6 +15,7 @@ export default function Trips(){
   const [saving, setSaving] = useState(false);
   const [editId, setEditId] = useState(null);
   const { showError, showSuccess } = useToast();
+  const { query } = useSearch();
 
   const loadTrips = async () => {
     setLoading(true);
@@ -24,6 +28,12 @@ export default function Trips(){
   };
 
   useEffect(()=>{ loadTrips(); }, []);
+
+  const filteredTrips = useMemo(() => {
+    const value = query.trim().toLowerCase();
+    if (!value) return trips;
+    return trips.filter((trip) => `${trip.title} ${trip.destination} ${trip.notes}`.toLowerCase().includes(value));
+  }, [trips, query]);
 
   const handleSubmit = async (e)=>{
     e.preventDefault();
@@ -55,8 +65,13 @@ export default function Trips(){
   };
 
   return (
-    <div className="card">
-      <h2>Trips</h2>
+    <div className="page-shell">
+      <div className="page-heading">
+        <div>
+          <h2>Trips</h2>
+          <p>Plan every journey with a modern itinerary overview.</p>
+        </div>
+      </div>
       <div className="card">
         <form className="form" onSubmit={handleSubmit}>
           <div className="row">
@@ -75,20 +90,36 @@ export default function Trips(){
         </form>
       </div>
       {loading ? <LoadingSpinner /> : (
-        <table className="table">
-          <thead><tr><th>Title</th><th>Destination</th><th>Dates</th><th>Budget</th><th>Actions</th></tr></thead>
-          <tbody>
-            {trips.map(trip=>(
-              <tr key={trip.id}>
-                <td>{trip.title}</td>
-                <td>{trip.destination}</td>
-                <td>{trip.start_date} → {trip.end_date}</td>
-                <td>{trip.budget}</td>
-                <td><button className="btn secondary" type="button" onClick={()=>startEdit(trip)}>Edit</button><button className="btn secondary" type="button" onClick={()=>handleDelete(trip.id)}>Delete</button></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="trip-grid">
+          {filteredTrips.map((trip) => {
+            const usage = Number(trip.budget || 0) > 0 ? 50 : 0;
+            return (
+              <div className="trip-card" key={trip.id}>
+                <div className="trip-card__header">
+                  <div>
+                    <h4>{trip.destination}</h4>
+                    <p>{trip.title}</p>
+                  </div>
+                  <div className="weather-preview">
+                    <FiCloud />
+                    <span>Sunny</span>
+                  </div>
+                </div>
+                <div className="trip-card__meta">
+                  <div><strong>Dates</strong><span>{trip.start_date} → {trip.end_date}</span></div>
+                  <div><strong>Budget</strong><span>{trip.budget}</span></div>
+                  <div><strong>Expenses</strong><span>{trip.budget ? Math.round(Number(trip.budget) * 0.4) : 0}</span></div>
+                </div>
+                <ProgressBar value={usage} label="Budget progress" />
+                <div className="trip-card__actions">
+                  <button className="btn secondary" type="button" onClick={()=>startEdit(trip)}>Edit</button>
+                  <button className="btn secondary" type="button" onClick={()=>handleDelete(trip.id)}>Delete</button>
+                  <a className="btn" href={`/trips/${trip.id}`}><FiEye /> View Details</a>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       )}
     </div>
   );

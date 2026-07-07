@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import LoadingSpinner from '../components/LoadingSpinner';
+import ProgressBar from '../components/ProgressBar';
 import { getExpenses, createExpense, updateExpense, deleteExpense, getSummary, getBudgetRemaining } from '../services/expenseService';
 import { getTrips } from '../services/tripService';
 import { useToast } from '../context/ToastContext';
@@ -33,6 +34,17 @@ export default function Expenses(){
   };
 
   useEffect(()=>{ loadData(); }, []);
+
+  const tripOverview = useMemo(() => {
+    return trips.map((trip) => {
+      const tripExpenses = expenses.filter((item) => String(item.trip_id) === String(trip.id));
+      const spent = tripExpenses.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+      const budget = Number(trip.budget || 0);
+      const remaining = budget - spent;
+      const usage = budget > 0 ? (spent / budget) * 100 : 0;
+      return { ...trip, spent, remaining, usage, tripExpenses };
+    });
+  }, [trips, expenses]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -72,8 +84,13 @@ export default function Expenses(){
   };
 
   return (
-    <div className="card">
-      <h2>Expenses</h2>
+    <div className="page-shell">
+      <div className="page-heading">
+        <div>
+          <h2>Expenses</h2>
+          <p>Manage every trip expense while keeping budget insights close at hand.</p>
+        </div>
+      </div>
       <div className="card form">
         <form onSubmit={handleSubmit}>
           <div className="row">
@@ -98,16 +115,40 @@ export default function Expenses(){
       {loading ? <LoadingSpinner /> : (
         <>
           <div className="card">
-            <h3>Summary</h3>
-            <p>Total spent: {summary?.total ?? 0}</p>
+            <h3>Total Expenses</h3>
+            <div className="hero-amount">{summary?.total ?? 0}</div>
             <p>Categories: {summary?.categories?.length ?? 0}</p>
           </div>
-          <table className="table">
-            <thead><tr><th>Date</th><th>Category</th><th>Amount</th><th>Trip</th><th>Actions</th></tr></thead>
-            <tbody>
-              {expenses.map(item=><tr key={item.id}><td>{item.spent_at.slice(0,10)}</td><td>{item.category}</td><td>{item.amount}</td><td>{item.trip_id || '-'}</td><td><button className="btn secondary" onClick={()=>startEdit(item)}>Edit</button><button className="btn secondary" onClick={()=>handleDelete(item.id)}>Delete</button></td></tr>)}
-            </tbody>
-          </table>
+          <div className="card">
+            <h3>Expenses by Trip</h3>
+            <div className="trip-breakdown-grid">
+              {tripOverview.map((trip) => (
+                <div className="trip-card" key={trip.id}>
+                  <div className="trip-card__header">
+                    <div>
+                      <h4>{trip.destination}</h4>
+                      <p>{trip.title}</p>
+                    </div>
+                    <span className={`pill ${trip.usage > 90 ? 'danger' : trip.usage > 60 ? 'warning' : 'success'}`}>{trip.usage > 90 ? 'Critical' : trip.usage > 60 ? 'Watch' : 'Healthy'}</span>
+                  </div>
+                  <div className="trip-card__meta">
+                    <div><strong>Budget</strong><span>{trip.budget}</span></div>
+                    <div><strong>Spent</strong><span>{trip.spent}</span></div>
+                    <div><strong>Remaining</strong><span>{trip.remaining}</span></div>
+                  </div>
+                  <ProgressBar value={trip.usage} label="Budget usage" />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="card">
+            <table className="table">
+              <thead><tr><th>Date</th><th>Category</th><th>Amount</th><th>Trip</th><th>Actions</th></tr></thead>
+              <tbody>
+                {expenses.map(item=><tr key={item.id}><td>{item.spent_at.slice(0,10)}</td><td>{item.category}</td><td>{item.amount}</td><td>{item.trip_id || '-'}</td><td><button className="btn secondary" onClick={()=>startEdit(item)}>Edit</button><button className="btn secondary" onClick={()=>handleDelete(item.id)}>Delete</button></td></tr>)}
+              </tbody>
+            </table>
+          </div>
         </>
       )}
     </div>
