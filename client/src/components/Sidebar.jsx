@@ -22,10 +22,13 @@ export default function Sidebar(){
           </NavLink>
         ))}
       </nav>
-      <div className="sidebar-footer">
-        <FiSettings />
-        <span>Settings</span>
-      </div>
+      <NavLink 
+ to="/settings" 
+ className="sidebar-footer"
+>
+  <FiSettings />
+  <span>Settings</span>
+</NavLink>
     </aside>
   );
 }

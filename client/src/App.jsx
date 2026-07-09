@@ -12,6 +12,7 @@ import Expenses from './pages/Expenses';
 import AI from './pages/AI';
 import Profile from './pages/Profile';
 import NotFound from './pages/NotFound';
+import Settings from './pages/Settings';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import LoadingSpinner from './components/LoadingSpinner';
@@ -52,6 +53,7 @@ export default function App() {
                 <Route path="/ai" element={<ProtectedRoute><AI /></ProtectedRoute>} />
                 <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                 <Route path="/404" element={<NotFound />} />
+                <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>}/>
                 <Route path="*" element={<Navigate to="/404" replace />} />
               </Routes>
             </main>

@@ -12,6 +12,7 @@ export default function Navbar(){
   const { query, setQuery } = useSearch();
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
+const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -58,9 +59,21 @@ export default function Navbar(){
       </div>
 
       <div className="nav-actions">
-        <button className="icon-btn" type="button" aria-label="Notifications">
+       <button 
+ className="icon-btn" 
+ type="button"
+ onClick={()=>setShowNotifications(!showNotifications)}
+ aria-label="Notifications"
+>
           <FiBell />
           {unread > 0 ? <span className="badge">{unread}</span> : null}
+          {showNotifications && (
+<div className="notification-dropdown">
+{notifications.length > 0 ?
+notifications.map((item,index)=>(
+<div key={index} className="notification-item">
+{item}</div>
+)):<p>No notifications</p>}</div>)}
         </button>
         <button className="icon-btn" type="button" onClick={toggleTheme} aria-label="Toggle theme">
           {theme === 'dark' ? <FiSun /> : <FiMoon />}

@@ -8,13 +8,15 @@ import { getTrips } from '../services/tripService';
 import { getExpenses, getSummary } from '../services/expenseService';
 
 const categoryColors = {
-  Food: '#10b981',
-  Transport: '#3b82f6',
-  Shopping: '#f59e0b',
-  Hotel: '#8b5cf6',
-  Others: '#ef4444',
-};
-
+  Food:'#10b981',
+  Transport:'#3b82f6',
+  shopping:'#f59e0b',
+  Accommodation:'#8b5cf6',
+  Equipment:'#6366f1',
+  finance:'#ef4444',
+  expenses:'#f97316',
+  trip:'#14b8a6'
+}; 
 export default function Dashboard(){
   const [stats, setStats] = useState({ trips: [], expenses: [] });
   const [summary, setSummary] = useState(null);
@@ -42,14 +44,23 @@ export default function Dashboard(){
   }, [showError]);
 
   const chartData = useMemo(() => {
-    const categories = ['Food', 'Transport', 'Shopping', 'Hotel', 'Others'];
-    const totals = categories.map((name) => {
-      const match = summary?.categories?.find((item) => item.category === name);
-      return { name, amount: Number(match?.total || 0) };
-    });
-    const max = Math.max(...totals.map((item) => item.amount), 1);
-    return totals.map((item) => ({ ...item, width: (item.amount / max) * 100 }));
-  }, [summary]);
+
+  const totals = (summary?.categories || []).map((item)=>({
+    name: item.category,
+    amount: Number(item.total || 0)
+  }));
+
+  const max = Math.max(
+    ...totals.map(item=>item.amount),
+    1
+  );
+
+  return totals.map(item=>({
+    ...item,
+    width:(item.amount/max)*100
+  }));
+
+},[summary]);
 
   const tripBreakdown = useMemo(() => {
     return stats.trips.map((trip) => {
