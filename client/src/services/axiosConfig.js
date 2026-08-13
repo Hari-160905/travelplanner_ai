@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_API_URL || 'https://travelplanner-ai-server.onrender.com/api',
   headers: { 'Content-Type': 'application/json' },
   // Do not send credentials by default; backend uses token in Authorization header.
   // `withCredentials: true` can cause CORS failures when server does not
