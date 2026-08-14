@@ -17,7 +17,11 @@ dotenv.config();
 const app = express();
 
 app.use(helmet());
-app.use(cors({ origin: '*' }));
+app.use(cors({
+  origin: "https://travelplanner-ai-three.vercel.app",
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('combined'));
