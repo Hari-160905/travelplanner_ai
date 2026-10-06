@@ -264,8 +264,7 @@ Visit the frontend URL printed by Vite (typically `http://localhost:3000`).
 
 ## Project Screenshots
 
-![Dashboard Placeholder](<img width="1366" height="768" alt="Screenshot (23)" src="https://github.com/user-attachments/assets/8121e714-2e10-4ef3-b456-c091ba1b9781" />
-)
+![Dashboard Placeholder]()
 
 ![AI Assistant Placeholder]()
 
