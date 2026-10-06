@@ -21,7 +21,7 @@ AI Travel Planner provides authenticated users with trip management, expense tra
 
 The app is separated into:
 
-- `client/` — React + Vite frontend
+- `client/` — React 
 - `server/` — Express backend API
 - `database/` — MySQL schema and sample data
 - `docs/` — project documentation assets
